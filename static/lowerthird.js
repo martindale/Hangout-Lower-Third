@@ -44,18 +44,25 @@
 		this.globalShow = false;
 
 		/**
-		 * @ApllicationController.canvasOverlay - defines the canvasOverlay container 
+		 * @ApllicationController.canvasOverlays - defines the canvasOverlay container 
 		 * @private
 		 * @type {Array}
 		*/
-		this.canvasOverlay = [];
+		this.canvasOverlays = [];
 
 		/**
-		 * @ApllicationController.overlay - defines the overlay container 
+		 * @ApllicationController.backgroundOverlay - defines the overlay container 
 		 * @private
 		 * @type {Array}
 		*/
-		this.overlay = [];
+		this.backgroundOverlay = [];
+
+		/**
+		 * @ApllicationController.logoOverlay - defines the overlay container 
+		 * @private
+		 * @type {Array}
+		*/
+		this.logoOverlay = [];
 
 		/**
 		 * @ApllicationController.name - defines the name variable used as an overlay on the canvas
@@ -322,29 +329,88 @@
 	}
 	
 	/**
+	 * @createImageResourceFromCanvas - Creates a image resource from a canvas element
+	 * @private
+	 * @param canvas {HTMLCanvasElement}
+	*/
+	ApplicationController.prototype.createImageResourceFromCanvas = function(canvas){
+		return gapi.hangout.av.effects.createImageResource(canvas.toDataURL());
+	}
+
+	/**
+	 * @prepareCanvasContext - Prepares a canvas for manipulation
+	 * @private
+	 * @param canvas {HTMLCanvasElement}
+	*/
+	ApplicationController.prototype.prepareCanvasContext = function(canvas){
+		canvas.clearRect(0, 0, canvas.canvas.width, canvas.canvas.height);
+		canvas.textAlign = "left";
+	}
+
+	/**
 	 * @createCanvas - Creates the canvas
 	 * @private
 	*/
-	ApplicationController.prototype.createCanvas = function(){		
-		console.log(this.name);
-		var canvas = document.getElementById('canvasName'), c = canvas.getContext('2d');
-		c.clearRect(0, 0, c.canvas.width, c.canvas.height)
-		c.font = "38px Arial";
-		c.textAlign = "left";
-		c.fillText(this.name, 50, 28);
-		var canvasImage = gapi.hangout.av.effects.createImageResource(canvas.toDataURL());
-		console.log(canvas.toDataURL());
+	ApplicationController.prototype.createCanvas = function(){
+		/*
+		 * Get 2d context for canvas elements
+		*/	
+		var canvasNameContext = this.getCanvasName().getContext("2d");
+		var canvasTagContext = this.getCanvasTag().getContext("2d");
+
+		/*
+		 * Prepare canvas elements for manipulation
+		*/
+		this.prepareCanvasContext(canvasNameContext);
+		this.prepareCanvasContext(canvasTagContext);
+
+		/*
+		 * Set font, sizes, and type for canvases 
+		*/
+		canvasNameContext.font = "38px Arial";
+		canvasTagContext.font = "16px Arial";
+
+		/*
+		 * Set Text values and positions for canvas elements
+		*/
+		canvasNameContext.fillText(this.name, 50, 28);
+		canvasTagContext.fillText(this.name, 50, 28);
+
+		/*
+		 * Convert canvas elements to image resources
+		*/
+		var canvasNameImage = this.createImageResourceFromCanvas(canvasNameContext.canvas);
+		var canvasTagImage = this.createImageResourceFromCanvas(canvasTagContext.canvas);
 		
-		this.canvasOverlay['canvasOverlay'] = canvasImage.createFaceTrackingOverlay({
+		/*
+		 * Create face tracking overlay from image resource
+		*/
+		this.canvasOverlays['canvasNameOverlay'] = canvasNameImage.createFaceTrackingOverlay({
 			'trackingFeature': gapi.hangout.av.effects.FaceTrackingFeature.NOSE_ROOT,
 			'scale': 1.0
 		});
-		this.canvasOverlay['canvasOverlay'].setOffset(0, 0.5);
+		this.canvasOverlays['canvasTagOverlay'] = canvasTagImage.createFaceTrackingOverlay({
+			'trackingFeature': gapi.hangout.av.effects.FaceTrackingFeature.NOSE_ROOT,
+			'scale': 1.0
+		});
+
+		/*
+		 * Set face tracking overlay parameters and toggle between Show/Hide
+		*/
+		this.canvasOverlays['canvasNameOverlay'].setOffset(0, 0.5);
 		if(this.globalShow === true){
-			this.canvasOverlay['canvasOverlay'].setVisible(true);
+			this.canvasOverlays['canvasNameOverlay'].setVisible(true);
 		}else{
-			this.canvasOverlay['canvasOverlay'].setVisible(false);
-			delete this.canvasOverlay['canvasOverlay'];
+			this.canvasOverlays['canvasNameOverlay'].setVisible(false);
+			delete this.canvasOverlays['canvasNameOverlay'];
+		}
+
+		this.canvasOverlays['canvasTagOverlay'].setOffset(0, 0.5);
+		if(this.globalShow === true){
+			this.canvasOverlays['canvasTagOverlay'].setVisible(true);
+		}else{
+			this.canvasOverlays['canvasTagOverlay'].setVisible(false);
+			delete this.canvasOverlays['canvasTagOverlay'];
 		}	
 	}
 	
@@ -357,16 +423,16 @@
 		var id = $("#templates li.selected").eq(0).attr("id");
 		var image = gapi.hangout.av.effects.createImageResource("//hangoutlowerthird.appspot.com/static/templates/" + id + ".png");
 		
-		this.overlay['overlay'] = image.createFaceTrackingOverlay({
+		this.backgroundOverlay['background'] = image.createFaceTrackingOverlay({
 			'trackingFeature': gapi.hangout.av.effects.FaceTrackingFeature.NOSE_ROOT,
 			'scale': 1.0
 		});
-		this.overlay['overlay'].setOffset(0, 0.5);
+		this.backgroundOverlay['background'].setOffset(0, 0.5);
 		if(this.globalShow === true){
-			this.overlay['overlay'].setVisible(true);
+			this.backgroundOverlay['background'].setVisible(true);
 		}else{
-			this.overlay['overlay'].setVisible(false);
-			delete this.overlay['overlay'];
+			this.backgroundOverlay['background'].setVisible(false);
+			delete this.backgroundOverlay['background'];
 		}	
 	}
 	
