@@ -298,16 +298,26 @@
 		jQuery("#button").removeClass("button_active").addClass("button");
 		this.globalShow = false;
 
-		for(var index in this.overlay){
-			this.overlay[index].setVisible(false);
-			delete this.overlay[index];
+		for(var index in this.backgroundOverlay){
+			this.backgroundOverlay[index].setVisible(false);
+			delete this.backgroundOverlay[index];
 		}
-		this.log(this.overlay);
+		this.log(this.backgroundOverlay);
 
-		for(var index in this.canvasOverlay){
-			this.canvasOverlay[index].setVisible(false);
-			delete this.canvasOverlay[index];
+		for(var index in this.canvasOverlays){
+			this.canvasOverlays[index].setVisible(false);
+			delete this.canvasOverlays[index];
 		}
+	}
+
+	/**
+	 * @getInputValue - Get Input values from form
+	 * @public
+	 * @param id {string}
+	 * @returns {String}
+	*/
+	ApplicationController.prototype.getInputValue = function(id){
+		return jQuery("#" + id).val();
 	}
 
 	/**
@@ -373,8 +383,8 @@
 		/*
 		 * Set Text values and positions for canvas elements
 		*/
-		canvasNameContext.fillText(this.name, 50, 28);
-		canvasTagContext.fillText(this.name, 50, 28);
+		canvasNameContext.fillText(this.getInputValue("Name"), 50, 28);
+		canvasTagContext.fillText(this.getInputValue("Tag"), 50, 28);
 
 		/*
 		 * Convert canvas elements to image resources
