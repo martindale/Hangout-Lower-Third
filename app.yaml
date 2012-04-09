@@ -1,0 +1,19 @@
+<<<<<<< HEAD
+application: hangoutlowerthird
+version: 1
+runtime: python
+api_version: 1
+
+handlers:
+- url: /static
+  static_dir: static
+=======
+application: hangoutlowerthird
+version: 1
+runtime: python
+api_version: 1
+
+handlers:
+- url: /static
+  static_dir: static
+>>>>>>> 726b3c706b8db85371d1323b2a6265c1fbe1b4db
