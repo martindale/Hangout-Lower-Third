@@ -65,11 +65,25 @@
 		this.logoOverlay = [];
 
 		/**
+		 * @ApllicationController.canvas - defines the canvas container 
+		 * @private
+		 * @type {null | HTMLCanvasElement}
+		*/
+		this.canvas = null;
+
+		/**
 		 * @ApllicationController.name - defines the name variable used as an overlay on the canvas
 		 * @protected
 		 * @type {String}
 		*/
 		this.name = "";
+
+		/**
+		 * @ApllicationController.fileReader - Create  a new HTML5 file reader
+		 * @protected
+		 * @type {String}
+		*/
+		this.fileReader = new FileReader();
 		
 		/*
 		 * Bind gapi events when API is ready
@@ -79,7 +93,7 @@
 		/*
 		 * Bind window events when window size has changed
 		*/
-		$(window).resize(this.onWindowResize.bind(this));
+		jQuery(window).resize(this.onWindowResize.bind(this));
 	}
 	
 	/**
@@ -133,8 +147,8 @@
 
 		/*
 		 * Creates input areas for the form
-		*/
-		var inputURL = input.clone().attr({"id":"URL"});
+		*/  
+		var inputURL = this.createElement("input", {"type": "file", "id": "iconfile", "name": "iconfile"});
 		var inputName = input.clone().attr({"id":"Name"});
 		var inputTag = input.clone().attr({"id":"Tag"});
 
@@ -224,20 +238,18 @@
 		/*
 		 * Append footer note to footer
 		*/	
-		footer.append(this.createElement("span",{"class":"footer_note"}).html("&copy 2012").append(this.createElement("a",{"href": "https://plus.google.com/117596712775912423303", "target": "_blank"}).html("Moritz")));
+		footer.append(this.createElement("span",{"class":"footer_note"}).html("&copy 2012").append(this.createElement("a",{"href": "https://plus.google.com/117596712775912423303", "target": "_blank"}).html(" Moritz")));
 		
 		/*
 		 * Bind click event to the On/Off switch
 		*/	
 		button.click(this.toggleShow.bind(this));
-		button.click(this.createOverlay.bind(this));
-		button.click(this.createCanvas.bind(this));
+		
 		
 		/*
 		 * Create canvas elements for the name and tagline
 		*/
-		this.createElement("canvas", {"id":"canvasName"}).appendTo("body").height("50").width("640").hide();
-		this.createElement("canvas", {"id":"canvasTag"}).appendTo("body").height("30").width("640").hide();
+		this.canvas = this.createElement("canvas", {"id":"canvas"}).height("75").width("640")[0];
 
 		/*
 		 * Append DOM structure to container
@@ -272,6 +284,25 @@
 	}
 	
 	/**
+	 * @readImageFromInput - Fired when the #body is scrolled
+	 * @private
+	*/
+	ApplicationController.prototype.readImageFromInput = function(input, callback){
+		if(input.files.length == 0){
+			callback.call(this, false);
+			return false;
+		}
+
+		this.fileReader.onload = function(evt){
+			callback.call(this, evt.target.result)
+		}.bind(this);
+		/*
+		 * @TODO Validate file input
+		*/
+		return this.fileReader.readAsDataURL(input.files[0]);
+	}
+
+	/**
 	 * @bodyOnScroll - Fired when the #body is scrolled
 	 * @private
 	 * @param evt {jQueryEventObject}
@@ -289,9 +320,24 @@
 	 * @see ApplicationController.buildDOM
 	*/
 	ApplicationController.prototype.toggleShow = function(){
+		/*
+		 * validate input data
+		*/
+		if(this.getInputValue("Name").length > 16){
+			gapi.hangout.layout.displayNotice("Your name is too long. Max ");
+			return;
+		}
+		if(this.getInputValue("Tag").length > 40){
+			gapi.hangout.layout.displayNotice("Your tagline is too long. Max 40 characters");
+			return;
+		}
+
 		if(this.globalShow === false){
 			jQuery("#button").removeClass("button").addClass("button_active");
 			this.globalShow = true;
+			this.createOverlay();
+			
+			setTimeout(this.createCanvas.bind(this),500);
 			return;
 		}
 
@@ -302,7 +348,6 @@
 			this.backgroundOverlay[index].setVisible(false);
 			delete this.backgroundOverlay[index];
 		}
-		this.log(this.backgroundOverlay);
 
 		for(var index in this.canvasOverlays){
 			this.canvasOverlays[index].setVisible(false);
@@ -321,23 +366,14 @@
 	}
 
 	/**
-	 * @getCanvasName - Get canvasName from DOM
+	 * @getCanvas - Get canvas from DOM
 	 * @private
 	 * @returns {HTMLCanvasElement}
 	*/
-	ApplicationController.prototype.getCanvasName = function(){
-		return jQuery("#canvasName")[0];
+	ApplicationController.prototype.getCanvas = function(){
+		return this.canvas;
 	}
 
-	/**
-	 * @getCanvasTag - Get canvasTag from DOM
-	 * @private
-	 * @returns {HTMLCanvasElement}
-	*/
-	ApplicationController.prototype.getCanvasTag = function(){
-		return jQuery("#canvasTag")[0];
-	}
-	
 	/**
 	 * @createImageResourceFromCanvas - Creates a image resource from a canvas element
 	 * @private
@@ -353,8 +389,26 @@
 	 * @param canvas {HTMLCanvasElement}
 	*/
 	ApplicationController.prototype.prepareCanvasContext = function(canvas){
+		canvas.canvas.width = 640;
+		canvas.canvas.height = 75;
 		canvas.clearRect(0, 0, canvas.canvas.width, canvas.canvas.height);
 		canvas.textAlign = "left";
+		canvas.textBaseline = "top";
+	}
+
+	/**
+	 * @drawImageToCanvas - Draws an image to a canvas
+	 * @private
+	 * @param data {string}, x {int}, y {int}, w {int}, h {int}, 
+	*/
+	ApplicationController.prototype.drawImageToCanvas = function(data, x, y, w, h, callback){
+		var img = new Image(w, h);
+
+		img.onload = function(){
+			this.getCanvas().getContext("2d").drawImage(img, x, y, w, h);
+			callback.call(this)	;
+		}.bind(this)
+		img.src = data;
 	}
 
 	/**
@@ -365,63 +419,59 @@
 		/*
 		 * Get 2d context for canvas elements
 		*/	
-		var canvasNameContext = this.getCanvasName().getContext("2d");
-		var canvasTagContext = this.getCanvasTag().getContext("2d");
+		var canvasContext = this.getCanvas().getContext("2d");
 
 		/*
 		 * Prepare canvas elements for manipulation
 		*/
-		this.prepareCanvasContext(canvasNameContext);
-		this.prepareCanvasContext(canvasTagContext);
-
-		/*
-		 * Set font, sizes, and type for canvases 
-		*/
-		canvasNameContext.font = "38px Arial";
-		canvasTagContext.font = "16px Arial";
-
-		/*
-		 * Set Text values and positions for canvas elements
-		*/
-		canvasNameContext.fillText(this.getInputValue("Name"), 50, 28);
-		canvasTagContext.fillText(this.getInputValue("Tag"), 50, 28);
-
-		/*
-		 * Convert canvas elements to image resources
-		*/
-		var canvasNameImage = this.createImageResourceFromCanvas(canvasNameContext.canvas);
-		var canvasTagImage = this.createImageResourceFromCanvas(canvasTagContext.canvas);
+		this.prepareCanvasContext(canvasContext);
 		
-		/*
-		 * Create face tracking overlay from image resource
-		*/
-		this.canvasOverlays['canvasNameOverlay'] = canvasNameImage.createFaceTrackingOverlay({
-			'trackingFeature': gapi.hangout.av.effects.FaceTrackingFeature.NOSE_ROOT,
-			'scale': 1.0
-		});
-		this.canvasOverlays['canvasTagOverlay'] = canvasTagImage.createFaceTrackingOverlay({
-			'trackingFeature': gapi.hangout.av.effects.FaceTrackingFeature.NOSE_ROOT,
-			'scale': 1.0
-		});
+		this.readImageFromInput(document.getElementById("iconfile"), function(data){
+			if(data === false){
+				return;
+			}
+			this.drawImageToCanvas(data, 480, 2, 70, 70, function(){
+				/*
+				 * Draw Name  max length 16 chars
+				 */
 
-		/*
-		 * Set face tracking overlay parameters and toggle between Show/Hide
-		*/
-		this.canvasOverlays['canvasNameOverlay'].setOffset(0, 0.5);
-		if(this.globalShow === true){
-			this.canvasOverlays['canvasNameOverlay'].setVisible(true);
-		}else{
-			this.canvasOverlays['canvasNameOverlay'].setVisible(false);
-			delete this.canvasOverlays['canvasNameOverlay'];
-		}
+				canvasContext.font = "38px Arial";
+				canvasContext.fillStyle = "black";
+				canvasContext.fillText(this.getInputValue("Name"), 60, 6);
 
-		this.canvasOverlays['canvasTagOverlay'].setOffset(0, 0.5);
-		if(this.globalShow === true){
-			this.canvasOverlays['canvasTagOverlay'].setVisible(true);
-		}else{
-			this.canvasOverlays['canvasTagOverlay'].setVisible(false);
-			delete this.canvasOverlays['canvasTagOverlay'];
-		}	
+				/*
+				 * Draw Tagline max length 43
+				*/
+				canvasContext.font = "15px Arial";
+				canvasContext.fillStyle = "white";
+				canvasContext.fillText(this.getInputValue("Tag"), 60, 47);
+
+				/*
+				 * Convert canvas elements to image resources
+				*/
+				var canvasImage = this.createImageResourceFromCanvas(canvasContext.canvas);
+				
+				/*
+				 * Create face tracking overlay from image resource
+				*/
+				this.canvasOverlays['canvasOverlay'] = canvasImage.createFaceTrackingOverlay({
+					'trackingFeature': gapi.hangout.av.effects.FaceTrackingFeature.NOSE_ROOT,
+					'scale': 1.0
+				});
+
+				/*
+				 * Set face tracking overlay parameters and toggle between Show/Hide
+				*/
+				this.canvasOverlays['canvasOverlay'].setOffset(0, 0.5);
+				if(this.globalShow === true){
+					this.canvasOverlays['canvasOverlay'].setVisible(true);
+				}else{
+					this.canvasOverlays['canvasOverlay'].setVisible(false);
+					delete this.canvasOverlays['canvasOverlay'];
+				}
+			});
+			
+		});
 	}
 	
 	/**
@@ -432,12 +482,15 @@
 	ApplicationController.prototype.createOverlay = function(evt){
 		var id = $("#templates li.selected").eq(0).attr("id");
 		var image = gapi.hangout.av.effects.createImageResource("//tolxdorff.appspot.com/a/lowerthird/i/templates/" + id + ".png");
+
 		
 		this.backgroundOverlay['background'] = image.createFaceTrackingOverlay({
 			'trackingFeature': gapi.hangout.av.effects.FaceTrackingFeature.NOSE_ROOT,
 			'scale': 1.0
 		});
+
 		this.backgroundOverlay['background'].setOffset(0, 0.5);
+		
 		if(this.globalShow === true){
 			this.backgroundOverlay['background'].setVisible(true);
 		}else{

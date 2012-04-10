@@ -29,7 +29,7 @@
 }
 
 #container .form {
-	margin-top: 5px;
+	margin-top: 0px;
 }
 
 #container .inputdiv {
@@ -48,6 +48,10 @@
 	padding:0px; 
 	margin:0px; 
 	width:288px;
+}
+
+#iconfile {
+	width: 120px;
 }
 
 #container #body #templatediv #customURL{
