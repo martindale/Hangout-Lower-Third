@@ -205,9 +205,10 @@
 		 * Create the footer Div
 		*/
 		var footer = div.clone().attr({id: "footer"}).html("&copy 2012 ");
-		footer.append(this.createElement("a",{"href": "https://plus.google.com/117596712775912423303", "target": "_blank"}).html("Moritz Tolxdorff"));
+		footer.append(this.createElement("a",{"href": "https://plus.google.com/117596712775912423303", "target": "_blank"}).html("Moritz"));
+		footer.append(this.createElement("span").html(" &amp; "));
+		footer.append(this.createElement("a",{"href": "https://plus.google.com/u/0/110106586947414476573", "target": "_blank"}).html("Robert"));
 		footer.append(this.createElement("span", {"class":"version"}).text("v 0.2.0-alpha"));
-		//v 0.1.0-alpha
 
 		/*
 		 * Append inner HTML elements to parrent DOM
@@ -226,7 +227,7 @@
 
 		fieldset.append(fieldrow_name,fieldrow_tagline,fieldrow_select,fieldrow_logo);
 
-		form.append(fieldset, info);
+		form.append(fieldset);
 		body.append(preview, preview,shadow, form);
 
 		/*
@@ -388,7 +389,7 @@
 					
 				}, function(img, w, h){
 					//resizing
-					var newSize = this.scaleSize(120, 70, img.width, img.height);
+					var newSize = this.scaleSize(70, 70, img.width, img.height);
 					img.width = newSize[0];
 					img.height = newSize[1];
 					this.log(img.width, img.height);
@@ -423,7 +424,7 @@
 		/*
 		 * Set the maximum height of the body minus header, input div and footer
 		*/
-		jQuery("#body").height(this.maxHeight-85);
+		jQuery("#body").height(this.maxHeight-84);
 	}
 
 	/**
