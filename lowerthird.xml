@@ -20,15 +20,20 @@
 	</ModulePrefs>
 	<Content type="html">
 		<![CDATA[
+
 			<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+			<script src="//tolxdorff.appspot.com/a/lowerthird/resize.js"></script>
 			<script src="//hangoutsapi.talkgadget.google.com/hangouts/api/hangout.js?v=1.0"></script> 
-			<link rel="stylesheet" type="text/css" href="//tolxdorff.appspot.com/a/lowerthird/style.css" />
 			<!--[if lt IE 9]>
 				<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
 			<![endif]-->
 			<div id="container">
 			</div>
-			<script src="//tolxdorff.appspot.com/a/lowerthird/lowerthird.js"></script>
+			<script type="text/javascript">
+				document.write("<li" + "nk rel=\"stylesheet\" type=\"text/css\" href=\"//tolxdorff.appspot.com/a/lowerthird/style.css?_=" + new Date().getTime() + "\"" + "/>");
+				document.write("<scr" + "ipt src=\"//tolxdorff.appspot.com/a/lowerthird/lowerthird.js?_=" + new Date().getTime() + "\"></" + "script>");
+			</script>
+			
 		]]>
 	</Content>
 </Module>
