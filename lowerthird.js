@@ -389,7 +389,7 @@
 					
 				}, function(img, w, h){
 					//resizing
-					var newSize = this.scaleSize(70, 70, img.width, img.height);
+					var newSize = this.scaleSize(70, img.width, img.height);
 					img.width = newSize[0];
 					img.height = newSize[1];
 					this.log(img.width, img.height);
@@ -403,15 +403,10 @@
 	 * @scaleSize - Scales the size of something
 	 * @public
 	*/
-	ApplicationController.prototype.scaleSize = function(maxWidth, maxHeight, width, height){
-		var ratio = height / width;
-		if(width >= maxWidth && ratio <= 1){
-			width = maxWidth;
-			height = width * ratio;
-		}else if(height >= maxHeight){
-			height = maxHeight;
-			width = height / ratio
-		}
+	ApplicationController.prototype.scaleSize = function(maxHeight, width, height){
+		var ratio = maxHeight / height;
+		width = width * ratio;
+		height = maxHeight;
 		return[width, height];
 	}
 
