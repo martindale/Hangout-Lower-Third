@@ -38,6 +38,10 @@ body
 	margin-right: 5px;
 }
 
+.line {
+	margin-bottom: 15px;
+}
+
 .preview{
 	background-color: #900;
 	color: white;
