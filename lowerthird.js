@@ -223,6 +223,7 @@
 		var fieldrow_time 		= div.clone().attr({"class": "fieldrow"});
 		var fieldrow_custom		= div.clone().attr({"class": "fieldrow"});
 		var fieldrow_load		= div.clone().attr({"class": "fieldrow"});
+		var fieldrow_faq		= div.clone().attr({"class": "fieldrow"});
 		var label_name 			= label.clone().attr({"for": "name"}).text("Enter name");
 		var label_tageline 		= label.clone().attr({"for": "name"}).text("Enter tagline");
 		var label_select 		= label.clone().attr({"for": "name"}).text("Select Lower Third");
@@ -230,9 +231,11 @@
 		var label_time 			= label.clone().attr({"for": "name"}).text("Enable time ");
 		var label_custom		= label.clone().attr({"for": "name"}).text("Custom Overlay");
 		var label_load			= label.clone().attr({"for": "name"}).text("Last used Lower Third (experimental)");
-		var hr_line				= this.createElement("hr", {"class":"line"});
+		var label_faq			= label.clone().attr({"for": "name"}).text("Having troubles? Please read the ");
+		var hr_line			= this.createElement("hr", {"class":"line"});
 		var lastused			= this.createElement("img", {"src": $.jStorage.get("overlay"), "width":"250", "height":"28", "id":"loaded"});
 		var loadlink			= this.createElement("a", {"href": "#", "id":"loadlink"}).html("Load");
+		var faqlink			= this.createElement("a", {"href": "https://groups.google.com/forum/#!topic/hangout-apps-by-moritz-support/RXaND6GJG9c", "target": "_blank"}).html("Frequently Asked Questions");
 		var span_required 		= span.clone().attr({"class": "required"}).text("*");
 		var inputText_name 		= inputText.clone().attr({"id": "Name", "class": "box", "name": "name"});
 		var inputText_tagline 	= inputText.clone().attr({"id": "Tag", "class": "box", "name": "tagline"});
@@ -274,8 +277,9 @@
 		label_custom.append(onoffswitch2);
 		fieldrow_custom.append(hr_line, label_custom, inputFile_custom);
 		fieldrow_load.append(label_load);
+		fieldrow_faq.append(label_faq, faqlink);
 
-		fieldset.append(fieldrow_name,fieldrow_tagline,fieldrow_select,fieldrow_logo,fieldrow_custom,fieldrow_load,lastused,loadlink);
+		fieldset.append(fieldrow_name,fieldrow_tagline,fieldrow_select,fieldrow_logo,fieldrow_custom,fieldrow_load,lastused,loadlink,fieldrow_faq);
 
 		form.append(fieldset);
 		body.append(shadow, form);
