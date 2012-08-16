@@ -217,19 +217,14 @@
 		var fieldrow_logo 		= div.clone().attr({"class": "fieldrow"});
 		var fieldrow_time 		= div.clone().attr({"class": "fieldrow"});
 		var fieldrow_custom		= div.clone().attr({"class": "fieldrow"});
-<<<<<<< HEAD
 		var fieldrow_presets	= div.clone().attr({"class": "fieldrow"});
-=======
 		var fieldrow_load		= div.clone().attr({"class": "fieldrow"});
-		var fieldrow_faq		= div.clone().attr({"class": "fieldrow"});
->>>>>>> a4b330fb49873c53ce93a9c4eddd00435f464f6c
 		var label_name 			= label.clone().attr({"for": "name"}).text("Enter name");
 		var label_tageline 		= label.clone().attr({"for": "name"}).text("Enter tagline");
 		var label_select 		= label.clone().attr({"for": "name"}).text("Select Lower Third");
 		var label_logo 			= label.clone().attr({"for": "name"}).text("Select logo");
 		var label_time 			= label.clone().attr({"for": "name"}).text("Enable time ");
 		var label_custom		= label.clone().attr({"for": "name"}).text("Custom Overlay");
-<<<<<<< HEAD
 		var label_presets		= label.clone().attr({"for": "name"}).text("Presets");
 		var hr_line				= this.createElement("hr", {"class":"line"});
 		var presetcontainer		= div.clone().attr({"class":"presetcontainer"});
@@ -237,14 +232,11 @@
 		var loadlink			= this.createElement("a", {"href": "#", "id":"loadlink", "class":"loadpreset"}).html("Load");
 		var spacer 				= div.clone().css({"margin-left":"25px", "margin-top":"80px"});
 		var donate 				= this.createElement("a", {"href": "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3YRQBKYGF38ZL", "target":"_blank"}).html("Please support by donating. Thanks");
-=======
 		var label_load			= label.clone().attr({"for": "name"}).text("Last used Lower Third (experimental)");
 		var label_faq			= label.clone().attr({"for": "name"}).text("Having troubles? Please read the ");
 		var hr_line			= this.createElement("hr", {"class":"line"});
 		var lastused			= this.createElement("img", {"src": $.jStorage.get("overlay"), "width":"250", "height":"28", "id":"loaded"});
 		var loadlink			= this.createElement("a", {"href": "#", "id":"loadlink"}).html("Load");
-		var faqlink			= this.createElement("a", {"href": "https://groups.google.com/forum/#!topic/hangout-apps-by-moritz-support/RXaND6GJG9c", "target": "_blank"}).html("Frequently Asked Questions");
->>>>>>> a4b330fb49873c53ce93a9c4eddd00435f464f6c
 		var span_required 		= span.clone().attr({"class": "required"}).text("*");
 		var clock_checkbox		= this.createElement("input", {"type": "checkbox", "id":"clock_checkbox"});
 		var clock_div			= div.clone().css({"margin-top": "15px"});
@@ -281,15 +273,9 @@
 		fieldrow_logo.append(label_logo, inputFile_logo,clock_div);
 		label_custom.append(onoffswitch2);
 		fieldrow_custom.append(hr_line, label_custom, inputFile_custom);
-<<<<<<< HEAD
+
 		presetcontainer.append(lastused, loadlink);
 		fieldrow_presets.append(label_presets,presetcontainer);
-=======
-		fieldrow_load.append(label_load);
-		fieldrow_faq.append(label_faq, faqlink);
-
-		fieldset.append(fieldrow_name,fieldrow_tagline,fieldrow_select,fieldrow_logo,fieldrow_custom,fieldrow_load,lastused,loadlink,fieldrow_faq);
->>>>>>> a4b330fb49873c53ce93a9c4eddd00435f464f6c
 
 		fieldset.append(fieldrow_name,fieldrow_tagline,fieldrow_select,fieldrow_logo,fieldrow_custom,fieldrow_presets);
 		spacer.append(donate);
@@ -683,18 +669,18 @@
 				img.src = data.result;
 				img.onload = function(){
 					this.overlayResource = gapi.hangout.av.effects.createImageResource(this.overlayImage);
-					this.overlay['custom'] = this.overlayResource.createOverlay({});
-					this.overlay['custom'].setPosition(0, 0);
+					this.overlays['custom'] = this.overlayResource.createOverlay({});
+					this.overlays['custom'].setPosition(0, 0);
 					if(img.height > img.width){
 						var scale = img.height/360;
 						if(scale >= 1){scale = 1}
-						this.overlay['custom'].setScale(scale, gapi.hangout.av.effects.ScaleReference.HEIGHT);
+						this.overlays['custom'].setScale(scale, gapi.hangout.av.effects.ScaleReference.HEIGHT);
 					}else{
 						var scale = img.width/640;
 						if(scale >= 1){scale = 1}
-						this.overlay['custom'].setScale(scale, gapi.hangout.av.effects.ScaleReference.WIDTH);
+						this.overlays['custom'].setScale(scale, gapi.hangout.av.effects.ScaleReference.WIDTH);
 					}
-					this.overlay['custom'].setVisible(true);
+					this.overlays['custom'].setVisible(true);
 					jQuery("#customfile").attr({"disabled": "disabled"});
 				}.bind(this);				
 			}.bind(this));	
@@ -703,9 +689,9 @@
 
 		jQuery("#onoffswitch2").removeClass("onoffswitch2_active").addClass("onoffswitch2");
 		this.globalShowCustom = false;
-		for(var index in this.overlay){
-			this.overlay[index].setVisible(false);
-			delete this.overlay[index];
+		for(var index in this.overlays){
+			this.overlays[index].setVisible(false);
+			delete this.overlays[index];
 			jQuery("#customfile").removeAttr("disabled");
 		}
 	}
@@ -779,13 +765,6 @@
 			}
 		}
 	}
-
-<<<<<<< HEAD
 	// Export instantiated LowerThird to main window
 	window["appController"] = new LowerThird();
 })()
-=======
-	// Export instantiated ApplicationController to main window
-	window["appController"] = new ApplicationController();
-})()
->>>>>>> a4b330fb49873c53ce93a9c4eddd00435f464f6c
