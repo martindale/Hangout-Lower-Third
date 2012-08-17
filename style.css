@@ -60,6 +60,12 @@ body
     font-weight: bold;
     border-bottom: 1px solid #D9D9D9;
     padding: 0 10px;
+    -webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }
 
 #body
@@ -134,11 +140,23 @@ form .fieldrow
 	position: absolute;
 	top: 7px;
 	left: 5px;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }
 
 .header_title {
 	margin-left: 18px;
 	line-height: 28px;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }
 
 
@@ -150,6 +168,12 @@ form .fieldrow
 	position: relative;
 	left: 5px;
 	top: 15px;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }
 
 #footer a {
@@ -157,6 +181,12 @@ form .fieldrow
 	font-family:verdana;
 	color:#2e2e2e;
 	text-decoration:none;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }
 #footer a:hover {
 	text-decoration:underline;
@@ -208,6 +238,13 @@ form .fieldrow
 	position: relative;
 	right: 0px;
 	top: 6px;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+
 }
 
 .onoffswitch2 {
@@ -223,6 +260,12 @@ form .fieldrow
 	position: relative;
 	right: 20px;
 	top: 0px;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }
 
 .onoffswitch_active{
@@ -238,6 +281,12 @@ form .fieldrow
 	position: relative;
 	right: 0px;
 	top: 6px;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }
 
 .onoffswitch2_active{
@@ -253,6 +302,12 @@ form .fieldrow
 	position: relative;
 	right: 20px;
 	top: 0px;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }
 
 .shadow{
