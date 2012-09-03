@@ -4,7 +4,7 @@
 	 * Lower Third for Google+ Hangouts
 	 * Copyright (c) 2012 Moritz Tolxdorff
 	 * 
-	 * Version: 1.2.0
+	 * Version: 1.2.5
 	 *
 	 * Lower Third for Google+ Hangouts is free software: you can redistribute it and/or modify
  	 * it under the terms of the GNU General Public License as published by
@@ -61,6 +61,10 @@
 		*/
 		this.globalShowCustom = false;
 
+		this.globalShowClock = false;
+
+		this.globalShowSaved = false;
+
 		/**
 		 * @LowerThird.overlays - defines the canvasOverlay container 
 		 * @private
@@ -99,13 +103,17 @@
 		this.name = "";
 
 		this.fullcanvas = "";
+		this.customcanvas = "";
+		this.loadedoverlay = "";
 
 		/**
 		 * @LowerThird.fileReader - Create  a new HTML5 file reader
 		 * @protected
 		 * @type {String}
 		*/
-		this.fileReader = new FileReader();
+		if(typeof FileReader !== "undefined"){
+			this.fileReader = new FileReader();
+		}
 		
 		/*
 		 * Bind gapi events when API is ready
@@ -172,17 +180,10 @@
 		var header = this.createElement("div", {"id": "header"});
 
 		/*
-		 * Create On/Off Switch link
-		*/		
-		var onoffswitch = this.createElement("a",{"id": "onoffswitch", "class": "onoffswitch"});
-		var onoffswitch2 = this.createElement("a",{"id": "onoffswitch2", "class": "onoffswitch2"});
-
-		/*
 	 	 * Append icon and title to header
 		*/
 		header.append(this.createElement("span", {"class": "header_icon"}));
 		header.append(this.createElement("span", {"class": "header_title"}).html("Hangout Lower Third"));
-		header.append(onoffswitch);
 
 		/*
 		 * Creates the shadow Div
@@ -203,67 +204,73 @@
 		/*
 		 * Creates the form element
 		*/
-		var fieldset 			= this.createElement("fieldset", {"id": "fieldset"});
-		var fieldrow_name 		= div.clone().attr({"class": "fieldrow"});
-		var fieldrow_tagline 	= div.clone().attr({"class": "fieldrow"});
-		var fieldrow_select 	= div.clone().attr({"class": "fieldrow"});
-		var fieldrow_logo 		= div.clone().attr({"class": "fieldrow"});
-		var fieldrow_time 		= div.clone().attr({"class": "fieldrow"});
-		var fieldrow_custom		= div.clone().attr({"class": "fieldrow"});
-		var fieldrow_load		= div.clone().attr({"class": "fieldrow"});
-		var label_name 			= label.clone().attr({"for": "name"}).text("Enter name");
-		var label_tageline 		= label.clone().attr({"for": "name"}).text("Enter tagline");
-		var label_select 		= label.clone().attr({"for": "name"}).text("Select Lower Third");
-		var label_logo 			= label.clone().attr({"for": "name"}).text("Select logo");
-		var label_time 			= label.clone().attr({"for": "name"}).text("Enable time ");
-		var label_custom		= label.clone().attr({"for": "name"}).text("Custom Overlay");
-		var label_load			= label.clone().attr({"for": "name"}).text("Last used Lower Third (experimental)");
-		var hr_line				= this.createElement("hr", {"class":"line"});
-		var lastused			= this.createElement("img", {"src": $.jStorage.get("overlay"), "width":"250", "height":"28", "id":"loaded"});
-		var loadlink			= this.createElement("a", {"href": "#", "id":"loadlink"}).html("Load");
-		var spacer 				= div.clone().css({"margin-left":"25px", "margin-top":"80px"});
-		var donate 				= this.createElement("a", {"href": "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3YRQBKYGF38ZL", "target":"_blank"}).html("Please support by donating. Thanks");
-		var span_required 		= span.clone().attr({"class": "required"}).text("*");
-		var clock_checkbox		= this.createElement("input", {"type": "checkbox", "id":"clock_checkbox"});
-		var clock_div			= div.clone().css({"margin-top": "15px"});
-		var clock_span			= span.clone().text(" Enable clock");
-		var inputText_name 		= inputText.clone().attr({"id": "Name", "class": "box", "name": "name"});
-		var inputText_tagline 	= inputText.clone().attr({"id": "Tag", "class": "box", "name": "tagline"});
-		var inputSelect 		= this.createElement("select", {"id": "Select", "class": "box"});
-		var inputCheckbox_time 	= inputCheckbox.clone().attr({"id": "Time", "class": "checkbox", "name": "time"});
+		var fieldset_lowerthird	= this.createElement("fieldset", {"class": "fieldset"});
+		var fieldset_clock		= this.createElement("fieldset", {"class": "fieldset"});
+		var fieldset_custom		= this.createElement("fieldset", {"class": "fieldset"});
+		var fieldset_presets	= this.createElement("fieldset", {"class": "fieldset"});
+
+		var legend_lowerthird	= this.createElement("legend", {"class": "legend"}).text("Lower Third").appendTo(fieldset_lowerthird);
+		var legend_clock		= this.createElement("legend", {"class": "legend"}).text("Display clock").appendTo(fieldset_clock);
+		var legend_custom	 	= this.createElement("legend", {"class": "legend"}).text("Custom Overlay").appendTo(fieldset_custom);
+		var legend_preset 		= this.createElement("legend", {"class": "legend"}).text("Presets").appendTo(fieldset_presets);
+
+		var switch_lowerthird	= this.createElement("a",{"id": "switch_lowerthird", "class": "onoffswitch"});
+		var switch_clock		= this.createElement("a",{"id": "switch_clock", "class": "onoffswitch"});
+		var switch_custom		= this.createElement("a",{"id": "switch_custom", "class": "onoffswitch"});
+
+		var button_save			= this.createElement("a", {"id": "button_save", "class": "button_save"}).html("Save");
+
+		var radio_left			= this.createElement("input", {"type": "radio", "id":"radio_left", "name":"clock", "checked":"checked"});
+		var radio_left_text		= label.clone().attr({"for": "name", "class":"radio_text"}).text("Left");
+		var radio_right			= this.createElement("input", {"type": "radio", "name":"clock", "id":"radio_right"});
+		var radio_right_text	= label.clone().attr({"for": "name"}).text("Right");
+
+		var nopresets			= span.clone().text("No saved presets!");
+
+		var inputText_name 		= inputText.clone().attr({"id": "Name", "class": "box_text", "name": "name"});
+		var inputText_tagline 	= inputText.clone().attr({"id": "Tag", "class": "box_text", "name": "tagline", "value":""}).css({"font-color":"#c0c0c0"});
+		var inputSelect 		= this.createElement("select", {"id": "Select", "class": "box_select"});
+		var inputText_preset	= inputText.clone().attr({"id": "PreName", "class": "box_text2", "name": "preset"});
+
 		var inputFile_logo 		= this.createElement("input", {"type": "file", "id": "iconfile", "class": "box", "name": "logo"});
 		var inputFile_custom	= this.createElement("input", {"type": "file", "id": "customfile", "class": "box", "name": "custom"});
 		var optionRed 			= option.clone().attr({"value": "red"}).text("Red");
 		var optionBlue 			= option.clone().attr({"value": "blue"}).text("Blue");
 		var optionGreen 		= option.clone().attr({"value": "green"}).text("Green");
-		var optionYellow 		= option.clone().attr({"value": "yellow"}).text("Yellow");	
+		var optionYellow 		= option.clone().attr({"value": "yellow"}).text("Yellow");
 
+		var spacer 				= div.clone().css({"margin-left":"25px", "margin-top":"10px"});
+
+		var donate 				= this.createElement("a", {"href": "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3YRQBKYGF38ZL", "class":"paypal","target":"_blank", "title":"Any donation is much appreciated. \n\n With a donation you support the development of this and other Hangout apps. Thank you!"}).html("Fund Development");
+
+		var hr_line				= this.createElement("hr", {"class":"line"});
+
+		var presetlist			= this.createElement("ul", {"id":"presetlist", "class":"presetlist"});
+		
+		
 		/*
 		 * Create the footer Div
 		*/
 		var footer = div.clone().attr({id: "footer"}).html("&copy 2012 ");
-		footer.append(this.createElement("a",{"href": "https://plus.google.com/117596712775912423303", "target": "_blank"}).html("Moritz"));
-		footer.append(this.createElement("span").html(" &amp; "));
-		footer.append(this.createElement("a",{"href": "https://plus.google.com/u/0/110106586947414476573", "target": "_blank"}).html("Robert"));
-		footer.append(this.createElement("span", {"class":"version"}).text(" - v 1.2.0"));
+		footer.append(this.createElement("a",{"href": "https://google.me/+MoritzTolxdorff", "target": "_blank"}).html("+Moritz"));
+		footer.append(this.createElement("span").html(" | "));
+		footer.append(this.createElement("a",{"href": "https://google.me/+RobertPitt", "target": "_blank"}).html("+Robert"));
+		footer.append(this.createElement("span", {"class":"version"}).text(" - v 1.2.5"));
 		footer.append(this.createElement("a",{"href": "http://goo.gl/abquE", "class":"version" ,"target":"_blank"}).html("Support"));
 
 		/*
 		 * Append all elements
 		*/
 		inputSelect.append(optionRed, optionBlue, optionGreen, optionYellow);
-		clock_div.append(clock_checkbox, clock_span);
-		fieldrow_name.append(label_name, onoffswitch2, inputText_name);
-		fieldrow_tagline.append(label_tageline, inputText_tagline);
-		fieldrow_select.append(label_select, inputSelect);
-		fieldrow_logo.append(label_logo, inputFile_logo,clock_div);
-		label_custom.append(onoffswitch2);
-		fieldrow_custom.append(hr_line, label_custom, inputFile_custom);
-		fieldrow_load.append(label_load);
 
-		fieldset.append(fieldrow_name,fieldrow_tagline,fieldrow_select,fieldrow_logo,fieldrow_custom,fieldrow_load,lastused,loadlink);
+		fieldset_lowerthird.append(switch_lowerthird, inputText_name,inputText_tagline,inputSelect,inputFile_logo);
+		fieldset_clock.append(switch_clock, radio_left, radio_left_text, radio_right, radio_right_text);
+		fieldset_custom.append(switch_custom, inputFile_custom);
+		fieldset_presets.append(inputText_preset, button_save,presetlist);
+
 		spacer.append(donate);
-		form.append(fieldset, spacer);
+
+		form.append(fieldset_lowerthird,fieldset_clock,fieldset_custom,fieldset_presets, spacer);
 		body.append(shadow, form);
 
 		/*
@@ -281,17 +288,12 @@
 		/*
 		 * Bind click event to the On/Off switch
 		*/	
-		onoffswitch.click(this.toggleShow.bind(this));
-
-		/*
-		 * Bind click event to the load link
-		*/
-		loadlink.click(this.loadSaved.bind(this));
-
-		/*
-		 * Bind click event to the On/Off switch
-		*/	
-		onoffswitch2.click(this.toggleShowCustom.bind(this));
+		switch_lowerthird.click(this.toggleShow.bind(this));
+		switch_clock.click(this.toggleShowClock.bind(this));
+		switch_custom.click(this.toggleShowCustom.bind(this));
+		inputText_tagline.click(this.clearTagline.bind(this));
+		inputText_tagline.focus(this.clearTagline.bind(this));
+		button_save.click(this.SavePreset.bind(this));
 
 		/*
 		 * Bind scroll event to toggle shadow
@@ -306,6 +308,116 @@
 	*/
 	LowerThird.prototype.getCanvas = function(){
 		return this.canvas;
+	}
+
+	LowerThird.prototype.clearTagline = function(){
+
+		jQuery("#inputText_tagline").value = '';
+	}
+
+		/**
+	 * @toggleShow - Fired when #button is clicked
+	 * @public
+	 * @see LowerThird.buildDOM
+	*/
+	LowerThird.prototype.toggleShow = function(){
+		if(this.overlays[this.loadedoverlay]){
+			this.overlays[this.loadedoverlay].setVisible(false);
+			this.overlays[this.loadedoverlay].dispose();
+			delete this.overlays[this.loadedoverlay];
+			this.globalShowSaved = false;
+		}
+		if(this.globalShow === false){
+			jQuery("#switch_lowerthird").removeClass("onoffswitch").addClass("onoffswitch_active");
+			jQuery("#Name").attr({"disabled": "disabled"});
+			jQuery("#Tag").attr({"disabled": "disabled"});
+			jQuery("#Select").attr({"disabled": "disabled"});
+			jQuery("#iconfile").attr({"disabled": "disabled"});
+			this.globalShow = true;
+			this.createCanvas();
+			return;
+		}
+
+		jQuery("#switch_lowerthird").removeClass("onoffswitch_active").addClass("onoffswitch");
+		jQuery("#Name").removeAttr("disabled");
+		jQuery("#Tag").removeAttr("disabled");
+		jQuery("#Select").removeAttr("disabled");
+		jQuery("#iconfile").removeAttr("disabled");
+		this.globalShow = false;
+
+		this.overlays['lowerthird'].setVisible(false);
+		this.overlays['lowerthird'].dispose();
+		delete this.overlays['lowerthird'];
+		
+	}
+
+	/**
+	 * @toggleShow - Fired when #button is clicked
+	 * @public
+	 * @see LowerThird.buildDOM
+	*/
+	LowerThird.prototype.toggleShowClock = function(){
+		if(this.globalShowClock === false){
+			jQuery("#switch_clock").removeClass("onoffswitch").addClass("onoffswitch_active");
+			this.globalShowClock = true;
+			jQuery("#radio_left").attr({"disabled": "disabled"});
+			jQuery("#radio_right").attr({"disabled": "disabled"});
+			this.drawClock();
+			return;
+		}
+		jQuery("#switch_clock").removeClass("onoffswitch_active").addClass("onoffswitch");
+		this.globalShowClock = false;
+		jQuery("#radio_left").removeAttr("disabled");
+		jQuery("#radio_right").removeAttr("disabled");
+		if("clock" in this.overlays){
+			this.overlays['clock'].setVisible(false);
+			this.overlays['clock'].dispose();
+			delete this.overlays['clock'];
+		}
+
+	}
+
+	/**
+	 * @toggleShowCustom - Fired when #button2 is clicked
+	 * @public
+	 * @see LowerThird.buildDOM
+	*/
+	LowerThird.prototype.toggleShowCustom = function(){
+		if(this.globalShowCustom === false){
+			jQuery("#switch_custom").removeClass("onoffswitch").addClass("onoffswitch_active");
+			this.globalShowCustom = true;
+			this.readImageFromInput(document.getElementById("customfile"), function(data){
+
+				this.overlayImage = data.result;
+				this.customcanvas = data.result;
+				var img = new Image();
+				img.src = data.result;
+				img.onload = function(){
+					this.overlayResource = gapi.hangout.av.effects.createImageResource(this.overlayImage);
+					this.overlays['custom'] = this.overlayResource.createOverlay({});
+					this.overlays['custom'].setPosition(0, 0);
+					if(img.height > img.width){
+						var scale = img.height/360;
+						if(scale >= 1){scale = 1}
+						this.overlays['custom'].setScale(scale, gapi.hangout.av.effects.ScaleReference.HEIGHT);
+					}else{
+						var scale = img.width/640;
+						if(scale >= 1){scale = 1}
+						this.overlays['custom'].setScale(scale, gapi.hangout.av.effects.ScaleReference.WIDTH);
+					}
+					this.overlays['custom'].setVisible(true);
+					jQuery("#customfile").attr({"disabled": "disabled"});
+				}.bind(this);				
+			}.bind(this));	
+			return;
+		}
+
+		jQuery("#switch_custom").removeClass("onoffswitch_active").addClass("onoffswitch");
+		this.globalShowCustom = false;
+		this.overlays['custom'].setVisible(false);
+		this.overlays['custom'].dispose();
+		delete this.overlays['custom'];
+		jQuery("#customfile").removeAttr("disabled");
 	}
 
 	/**
@@ -342,36 +454,6 @@
 	}
 
 	/**
-	 * @drawClock - Draws the clock to the canvas
-	 * @private
-	*/
-	LowerThird.prototype.drawClock = function(){
-
-		this.clockIntervalID = setTimeout(this.drawClock.bind(this), 30 * 1000);
-		if("clock" in this.overlays){
-			if((new Date()).getMinutes() == this.currentTimestamp.getMinutes()){
-				return;
-			}
-			this.overlays['clock'].setVisible(false);
-			this.overlays['clock'].dispose();
-			delete this.overlays['clock'];
-		}
-		var clockbg = "data:image/png;base64,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/GMzLdsAAAAgY0hSTQAAeiUAAICDAAD5/wAAgOkAAHUwAADqYAAAOpgAABdvkl/FRgAAAdNJREFUeNrs02kLDwYAB+C/+5j7yjHTkCNHLEImi4hoIiIiEhGJSEQiskQkIhLRREQ0EREhRCMjLEduDXObazze/L+F34vnIzwFfMFn/F/0CR/xoeg93uE/vMUbvMaropd4ged4hn/xFE/wGP/gER7iAe7jHu7iDm7jFm7iBq7jb1zDVVzBZVzCX7iICziPP3EOZ3EGp3EKJ3ECx3EMR3EEh3EIB3EA+7EPf2Av9mA3dmEndmA7tmErfscWbMYmbMQGrMc6rMUarMYqrMQKLMcyLMUS/IbFWISFWID5mIe5mIPZmIWZmIHpmIapmILJmISJmIDxGIexGIPRGIWRGIHhGIahGILBGISBGIBf0R/90Bd90Bu90BM98Au6oxt+Rld0QWd0Qkd0wE9oj3ZoizZojVZoiRZojmZoiiZojB/RCD+gIb5HA9RHPdRFHdRGLdREDVRHNVRFFVQuqoTvUBEVUB7lULaoDEqjVFFJlCgqoFBIkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkAT5toN8BQAA//8DAOqBXrc1JPElAAAAAElFTkSuQmCC";
-
-		var clockContext = this.getCanvasClock().getContext("2d");
-		this.prepareCanvasContext(clockContext,360,640);
-		this.currentTimestamp = new Date();
-		this.drawImageToCanvas(clockContext, clockbg, 0, 5, 250, 20, function(){
-			this.drawClockToCanvas(this.createClock(this.currentTimestamp), 5, 7, 15, "black");
-			var canvasImage = this.createImageResourceFromCanvas(clockContext.canvas);
-			this.overlays['clock'] = canvasImage.createOverlay({});
-			this.overlays['clock'].setScale(1, gapi.hangout.av.effects.ScaleReference.WIDTH);
-			this.overlays['clock'].setPosition(0, 0);
-			this.overlays['clock'].setVisible(true);
-		}.bind(this));
-	}
-
-	/**
 	 * @prepareCanvasContext - Prepares a canvas for manipulation
 	 * @private
 	 * @param canvas {HTMLCanvasElement}
@@ -384,72 +466,7 @@
 		canvas.textBaseline = "top";
 	}
 
-	/**
-	 * @drawImageToCanvas - Draws an image to a canvas
-	 * @private
-	 * @param context, data {string}, x {int}, y {int}, w {int}, h {int}, 
-	*/
-	LowerThird.prototype.drawImageToCanvas = function(context, data, x, y, w, h, callback, prepcall){
-		var img = new Image();
-
-		img.onload = function(){
-			(prepcall || function(){}).call(this, img, w, h);
-			context.drawImage(img, x, y, img.width, img.height);
-			callback.call(this);
-		}.bind(this)
-		img.src = data;
-	}
-
-	/**
-	 * @drawTextToCanvas - Draws text to a canvas
-	 * @private
-	 * @param data {string}, x {int}, y {int}, w {int}, h {int}, 
-	*/
-	LowerThird.prototype.drawTextToCanvas = function(text, x, y, size, color, font){
-		var canvasContext = this.getCanvas().getContext("2d");
-		canvasContext.font = size + "px " + (font ? font : "Arial");
-		canvasContext.fillStyle = color || "black";
-		canvasContext.fillText(text, x, y);
-	}
-
-	/**
-	 * @drawClockToCanvas - Draws text to a canvas
-	 * @private
-	 * @param data {string}, x {int}, y {int}, w {int}, h {int}, 
-	*/
-	LowerThird.prototype.drawClockToCanvas = function(text, x, y, size, color, font){
-		var canvasContext = this.getCanvasClock().getContext("2d");
-		canvasContext.font = size + "px " + (font ? font : "Arial");
-		canvasContext.fillStyle = color || "black";
-		canvasContext.fillText(text, x, y);
-	}
-
-	/**
-	 * @loadSaved - Loads the last used Overlay
-	 * @private
-	*/
-	LowerThird.prototype.loadSaved = function(){
-		if(this.globalShow === false){
-			this.globalShow = true;
-			var storedImage = gapi.hangout.av.effects.createImageResource($.jStorage.get("overlay"));
-			this.overlays['lowerthird'] = storedImage.createOverlay({
-			});
-			this.overlays['lowerthird'].setScale(1, gapi.hangout.av.effects.ScaleReference.WIDTH);
-			this.overlays['lowerthird'].setPosition(0, 0.39);
-			this.overlays['lowerthird'].setVisible(true);
-			jQuery("#loadlink").html("Unload");
-		}else{
-			this.globalShow = false;
-			for(var index in this.overlays){
-				this.overlays[index].setVisible(false);
-				this.overlays[index].dispose();
-				delete this.overlays[index];
-			}
-			jQuery("#loadlink").html("Load");
-		}
-	}
-
-	/**
+		/**
 	 * @createCanvas - Creates the canvas
 	 * @private
 	*/
@@ -520,7 +537,6 @@
 			var overlayCanvas = canvasContext.canvas;
 			this.fullcanvas = overlayCanvas.toDataURL();
 			var overlayData = overlayCanvas.toDataURL();
-			$.jStorage.set("overlay", overlayData);
 			if(this.globalShow === true){
 				this.overlays['lowerthird'].setVisible(true);
 			}else{
@@ -533,7 +549,6 @@
 		this.drawImageToCanvas(canvasContext, logo, 0, 0, 640, 75, function(){
 			this.readImageFromInput(document.getElementById("iconfile"), function(data){
 				if(data === false || data.result === false){
-					gapi.hangout.layout.displayNotice("No logo selected!");
 					finish();
 					return;
 				}
@@ -550,10 +565,218 @@
 					var newSize = this.scaleSize(70, img.width, img.height);
 					img.width = newSize[0];
 					img.height = newSize[1];
-					//this.log(img.width, img.height);
 				});		
 			});
 		});	
+	}
+
+	/**
+	 * @drawImageToCanvas - Draws an image to a canvas
+	 * @private
+	 * @param context, data {string}, x {int}, y {int}, w {int}, h {int}, 
+	*/
+	LowerThird.prototype.drawImageToCanvas = function(context, data, x, y, w, h, callback, prepcall){
+		var img = new Image();
+
+		img.onload = function(){
+			(prepcall || function(){}).call(this, img, w, h);
+			context.drawImage(img, x, y, img.width, img.height);
+			callback.call(this);
+		}.bind(this)
+		img.src = data;
+	}
+
+	/**
+	 * @drawTextToCanvas - Draws text to a canvas
+	 * @private
+	 * @param data {string}, x {int}, y {int}, w {int}, h {int}, 
+	*/
+	LowerThird.prototype.drawTextToCanvas = function(text, x, y, size, color, font){
+		var canvasContext = this.getCanvas().getContext("2d");
+		canvasContext.font = size + "px " + (font ? font : "Arial");
+		canvasContext.fillStyle = color || "black";
+		canvasContext.fillText(text, x, y);
+	}
+
+	/**
+	 * @drawClockToCanvas - Draws text to a canvas
+	 * @private
+	 * @param data {string}, x {int}, y {int}, w {int}, h {int}, 
+	*/
+	LowerThird.prototype.drawClockToCanvas = function(text, x, y, size, color, font){
+		var canvasContext = this.getCanvasClock().getContext("2d");
+		canvasContext.font = size + "px " + (font ? font : "Arial");
+		canvasContext.fillStyle = color || "black";
+		canvasContext.fillText(text, x, y);
+	}
+
+		/**
+	 * @drawClock - Draws the clock to the canvas
+	 * @private
+	*/
+	LowerThird.prototype.drawClock = function(){
+		if(this.globalShowClock === true){
+			this.clockIntervalID = setTimeout(this.drawClock.bind(this), 30 * 1000);
+			if("clock" in this.overlays){
+				if((new Date()).getMinutes() == this.currentTimestamp.getMinutes()){
+					return;
+				}
+				this.overlays['clock'].setVisible(false);
+				this.overlays['clock'].dispose();
+				delete this.overlays['clock'];
+			}
+			var selected_id = $("input[@name=clock]:checked").attr('id');
+			if(selected_id === "radio_left"){
+				var clockbg = "data:image/png;base64,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/GMzLdsAAAAgY0hSTQAAeiUAAICDAAD5/wAAgOkAAHUwAADqYAAAOpgAABdvkl/FRgAAAdNJREFUeNrs02kLDwYAB+C/+5j7yjHTkCNHLEImi4hoIiIiEhGJSEQiskQkIhLRREQ0EREhRCMjLEduDXObazze/L+F34vnIzwFfMFn/F/0CR/xoeg93uE/vMUbvMaropd4ged4hn/xFE/wGP/gER7iAe7jHu7iDm7jFm7iBq7jb1zDVVzBZVzCX7iICziPP3EOZ3EGp3EKJ3ECx3EMR3EEh3EIB3EA+7EPf2Av9mA3dmEndmA7tmErfscWbMYmbMQGrMc6rMUarMYqrMQKLMcyLMUS/IbFWISFWID5mIe5mIPZmIWZmIHpmIapmILJmISJmIDxGIexGIPRGIWRGIHhGIahGILBGISBGIBf0R/90Bd90Bu90BM98Au6oxt+Rld0QWd0Qkd0wE9oj3ZoizZojVZoiRZojmZoiiZojB/RCD+gIb5HA9RHPdRFHdRGLdREDVRHNVRFFVQuqoTvUBEVUB7lULaoDEqjVFFJlCgqoFBIkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkARJkAT5toN8BQAA//8DAOqBXrc1JPElAAAAAElFTkSuQmCC";
+				x_text = 5;
+				x_bg = 0;
+			}
+			if(selected_id === "radio_right"){
+				var clockbg = "data:image/png;base64,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";
+				x_text = 573;
+				x_bg = 440;
+			}
+			var clockContext = this.getCanvasClock().getContext("2d");
+			this.prepareCanvasContext(clockContext,360,640);
+			this.currentTimestamp = new Date();
+			this.drawImageToCanvas(clockContext, clockbg, x_bg, 5, 250, 20, function(){
+				this.drawClockToCanvas(this.createClock(this.currentTimestamp), x_text, 7, 15, "black");
+				var canvasImage = this.createImageResourceFromCanvas(clockContext.canvas);
+				this.overlays['clock'] = canvasImage.createOverlay({});
+				this.overlays['clock'].setScale(1, gapi.hangout.av.effects.ScaleReference.WIDTH);
+				this.overlays['clock'].setPosition(0, 0);
+				this.overlays['clock'].setVisible(true);
+			}.bind(this));
+		}
+	}
+
+	/**
+	 * @loadSaved - Loads the last used Overlay
+	 * @private
+	*/
+	LowerThird.prototype.generatePresets = function(){
+		var storage = jQuery.jStorage.index();
+		ul = jQuery("#presetlist");
+		jQuery("li",ul).remove();
+		var presets = jQuery.grep(storage, function(a){
+			return (a != "notice");
+		});
+		presets_out = jQuery.grep(presets, function(a, b){
+			return (a != "overlay");
+		});
+		if(presets_out.length === 0){
+			nopresets = this.createElement("li").text("No saved presets!");
+			jQuery("#presetlist").append(nopresets);
+		}else{
+			var i = 0;
+			for(i = 0; i < presets_out.length; i++){
+				var li = this.createElement("li", {"class":"presetlist_li", "id": presets_out[i]}).text(presets_out[i].substring(4));
+				var deleteButton = this.createElement("a",{"class":"delete"});
+				var loadButton = this.createElement("a",{"class":"load"});
+				deleteButton.click(this.DeletePreset.bind(this));
+				loadButton.click(this.loadPreset.bind(this));
+				li.click(this.loadPresetText.bind(this));
+				li.append(deleteButton,loadButton);
+				jQuery("#presetlist").append(li);
+			}
+		}
+	}
+
+	/**
+	 * @loadSaved - Loads the last used Overlay
+	 * @private
+	*/
+	LowerThird.prototype.loadPresetText = function(evt){
+		value = evt.target.textContent;
+		//console.log(evt);
+		jQuery("#PreName").val(value);
+	}
+
+	/**
+	 * @loadSaved - Loads the last used Overlay
+	 * @private
+	*/
+	LowerThird.prototype.SavePreset = function(){
+		var name = this.getInputValue("PreName");
+		if(name === ""){
+			$.modal('<div><h1>Alert</h1><h4>Please enter a name for your preset first!</h4></div>');
+			//alert("Please enter a name for your preset first!");
+			return;
+			name = "default";
+		}
+		if(this.globalShow == false){
+			$.modal('<div><h1>Alert</h1><h4>Nothing to save. <br />Enable Lower Third first.</h4></div>');
+			//alert("Nothing to save! \nEnable Lower Third first.");
+			return;
+		}
+		var data = this.fullcanvas;
+		//console.log(jQuery.jStorage.storageSize()/1024/1024 + "MB");
+		//$.jStorage.storageAvailable();
+		try{
+			jQuery.jStorage.set("pre_"+name, data);
+		}catch(e){
+			if(e.code === 22 || e.code === 1014){
+				alert("No space left in local storage! Please delete presets!");
+			}
+		}
+		jQuery("#PreName").val("");
+		this.generatePresets();
+	}
+
+	/**
+	 * @loadSaved - Loads the last used Overlay
+	 * @private
+	*/
+	LowerThird.prototype.DeletePreset = function(evt){
+		id = evt.target.parentNode.id;
+		jQuery.jStorage.deleteKey(id);
+		this.generatePresets();
+	}
+
+		/**
+	 * @loadSaved - Loads the last used Overlay
+	 * @private
+	*/
+	LowerThird.prototype.loadPreset = function(evt){
+		id = evt.target.parentNode.id;
+		if(this.overlays[this.loadedoverlay]){
+			this.overlays[this.loadedoverlay].setVisible(false);
+			this.overlays[this.loadedoverlay].dispose();
+			delete this.overlays[this.loadedoverlay];
+
+		}
+		if (this.loadedoverlay != id) {
+			this.globalShowSaved = false;
+		};
+		if(this.overlays['lowerthird']){
+			this.globalShow = false;
+			jQuery("#switch_lowerthird").removeClass("onoffswitch_active").addClass("onoffswitch");
+			this.overlays['lowerthird'].setVisible(false);
+			this.overlays['lowerthird'].dispose();
+			delete this.overlays['lowerthird'];
+			jQuery("#Name").removeAttr("disabled");
+			jQuery("#Tag").removeAttr("disabled");
+			jQuery("#Select").removeAttr("disabled");
+			jQuery("#iconfile").removeAttr("disabled");
+		}
+		if(this.globalShowSaved === false){
+			this.globalShowSaved = true;
+			this.loadedoverlay = id;
+			var storedImage = gapi.hangout.av.effects.createImageResource($.jStorage.get(id));
+			this.overlays[id] = storedImage.createOverlay({
+			});
+			this.overlays[id].setScale(1, gapi.hangout.av.effects.ScaleReference.WIDTH);
+			this.overlays[id].setPosition(0, 0.39);
+			this.overlays[id].setVisible(true);
+		}else{
+			this.globalShowSaved = false;
+			this.loadedoverlay = "";
+			if(this.overlays[id]){
+				this.overlays[id].setVisible(false);
+				this.overlays[id].dispose();
+				delete this.overlays[id];
+			}
+		}
 	}
 	
 	/**
@@ -590,88 +813,6 @@
 		jQuery("#body").scrollTop() > 0 ? jQuery(".shadow", "#container").show() : jQuery(".shadow", "#container").hide(); 
 	}
 	
-	/**
-	 * @toggleShow - Fired when #button is clicked
-	 * @public
-	 * @see LowerThird.buildDOM
-	*/
-	LowerThird.prototype.toggleShow = function(){
-		if(this.globalShow === false){
-			jQuery("#onoffswitch").removeClass("onoffswitch").addClass("onoffswitch_active");
-			this.globalShow = true;
-			this.createCanvas();
-			if(jQuery("#clock_checkbox").is(':checked')){
-				this.drawClock();
-			}
-			jQuery("#Name").attr({"disabled": "disabled"});
-			jQuery("#Tag").attr({"disabled": "disabled"});
-			jQuery("#Select").attr({"disabled": "disabled"});
-			jQuery("#iconfile").attr({"disabled": "disabled"});
-			jQuery("#clock_checkbox").attr({"disabled": "disabled"});
-
-			jQuery("#loaded").attr({"src": this.fullcanvas})
-			return;
-		}
-
-		jQuery("#onoffswitch").removeClass("onoffswitch_active").addClass("onoffswitch");
-		this.globalShow = false;
-
-		for(var index in this.overlays){
-			this.overlays[index].setVisible(false);
-			this.overlays[index].dispose();
-			delete this.overlays[index];
-			jQuery("#Name").removeAttr("disabled");
-			jQuery("#Tag").removeAttr("disabled");
-			jQuery("#Select").removeAttr("disabled");
-			jQuery("#iconfile").removeAttr("disabled");
-			jQuery("#clock_checkbox").removeAttr("disabled");
-		}
-	}
-
-	/**
-	 * @toggleShowCustom - Fired when #button2 is clicked
-	 * @public
-	 * @see LowerThird.buildDOM
-	*/
-	LowerThird.prototype.toggleShowCustom = function(){
-		if(this.globalShowCustom === false){
-			jQuery("#onoffswitch2").removeClass("onoffswitch2").addClass("onoffswitch2_active");
-			this.globalShowCustom = true;
-			this.readImageFromInput(document.getElementById("customfile"), function(data){
-
-				this.overlayImage = data.result;
-				var img = new Image();
-				img.src = data.result;
-				img.onload = function(){
-					this.overlayResource = gapi.hangout.av.effects.createImageResource(this.overlayImage);
-					this.overlays['custom'] = this.overlayResource.createOverlay({});
-					this.overlays['custom'].setPosition(0, 0);
-					if(img.height > img.width){
-						var scale = img.height/360;
-						if(scale >= 1){scale = 1}
-						this.overlays['custom'].setScale(scale, gapi.hangout.av.effects.ScaleReference.HEIGHT);
-					}else{
-						var scale = img.width/640;
-						if(scale >= 1){scale = 1}
-						this.overlays['custom'].setScale(scale, gapi.hangout.av.effects.ScaleReference.WIDTH);
-					}
-					this.overlays['custom'].setVisible(true);
-					jQuery("#customfile").attr({"disabled": "disabled"});
-				}.bind(this);				
-			}.bind(this));	
-			return;
-		}
-
-		jQuery("#onoffswitch2").removeClass("onoffswitch2_active").addClass("onoffswitch2");
-		this.globalShowCustom = false;
-		for(var index in this.overlays){
-			this.overlays[index].setVisible(false);
-			this.overlays[index].dispose();
-			delete this.overlays[index];
-			jQuery("#customfile").removeAttr("disabled");
-		}
-	}
-
 	/**
 	 * @getInputValue - Get Input values from form
 	 * @public
@@ -730,6 +871,7 @@
 				this.buildDOM();
 				this.scale();
 				this.getParticipant();
+				this.generatePresets();
 				console.log("Lower Third App loaded!");
 				if($.jStorage.get("notice") != "true"){
 					$.modal('<div><h1>Notice</h1><h4>The overlay is mirrored. <br />It looks fine for everyone else!</h4></div>');
