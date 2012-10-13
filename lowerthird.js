@@ -671,8 +671,8 @@
 			var i = 0;
 			for(i = 0; i < presets_out.length; i++){
 				var li = this.createElement("li", {"class":"presetlist_li", "id": presets_out[i]}).text(presets_out[i].substring(4));
-				var deleteButton = this.createElement("a",{"class":"delete"});
-				var loadButton = this.createElement("a",{"class":"load"});
+				var deleteButton = this.createElement("a",{"class":"delete", "title":"Delete this preset.  WARNING: this cannot be undone!"});
+				var loadButton = this.createElement("a",{"class":"load", "title":"Load this preset."});
 				deleteButton.click(this.DeletePreset.bind(this));
 				loadButton.click(this.loadPreset.bind(this));
 				li.click(this.loadPresetText.bind(this));
